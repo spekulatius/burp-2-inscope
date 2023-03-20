@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ -f "$1" ]; then
+    # Remove the previous file, if it exists.
+    if [ -f ".scope" ]; then rm .scope; fi
+
+    # Add all hosts in scope.
+    cat "$1" | jq '.target.scope.include | .[] | .host' | uniq | sed 's/\\\\/\\/g' | sed 's/^"\(.*\)\$"$/\1/' >> .scope
+
+    # Append all hosts out of scope.
+    cat "$1" | jq '.target.scope.exclude | .[] | .host' | uniq | sed 's/\\\\/\\/g' | sed 's/^"\(.*\)\$"$/!\1/' >> .scope
+else
+    echo "File \"$1\" doesn't exist.";
+fi
